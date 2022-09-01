@@ -1,6 +1,5 @@
 const reponse = await fetch("http://localhost:3000/api/products/");
 const products = await reponse.json();
-console.log(products);
 
 function showProducts(products) {
 
@@ -15,6 +14,7 @@ function showProducts(products) {
     
         const imageElement = document.createElement("img");
         imageElement.src = products[i].imageUrl;
+        imageElement.alt = products[i].altTxt;
         productElement.appendChild(imageElement);
         
         const nameElement = document.createElement("h3");
@@ -32,3 +32,4 @@ function showProducts(products) {
     };
 }
 showProducts(products);
+
