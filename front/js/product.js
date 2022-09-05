@@ -35,5 +35,25 @@ function showProductInfo(products) {
        optionColors.value = product.colors[i];
        selectColors.appendChild(optionColors);
    } 
+   addToCart(product);
 }
 showProductInfo(products);
+
+function addToCart(product) {
+    const addToCartButton = document.getElementById("addToCart");
+    addToCartButton.addEventListener("click",  function() {
+        let arrayProduct = JSON.parse(localStorage.getItem("product"));
+        const selectColors = document.getElementById("colors");
+
+        const fusionColorProduct = Object.assign({} , product, {
+            color : `${selectColors.value}`,
+            quantity: 1,
+        });
+
+        if (arrayProduct == null) {
+            arrayProduct = [];
+            arrayProduct.push(fusionColorProduct);
+            localStorage.setItem("product",JSON.stringify(arrayProduct));
+        }
+    });
+}
