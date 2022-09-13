@@ -32,4 +32,3 @@ function showProducts(products) {
     };
 }
 showProducts(products);
-

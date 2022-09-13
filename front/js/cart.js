@@ -71,10 +71,10 @@ function getCart(products) {
             productItemContentSettingsDelete.className = "cart__item__content__settings__delete";
             productItemContentSettings.appendChild(productItemContentSettingsDelete);
 
-            const productSupprimer = document.createElement("p");
-            productSupprimer.className = "deleteItem";
-            productSupprimer.innerText = "Supprimer";
-            productItemContentSettingsDelete.appendChild(productSupprimer);
+            const productDeleted = document.createElement("p");
+            productDeleted.className = "deleteItem";
+            productDeleted.innerText = "Supprimer";
+            productItemContentSettingsDelete.appendChild(productDeleted);
         }
     }
 }
@@ -103,3 +103,34 @@ function getTotal(pro) {
     
 }
 getTotal();
+
+function updateQuantity() {
+    document.addEventListener('change', function(event) {
+        if(event.target.classList.contains('itemQuantity')) {
+            if(event.target.value >= 1 && event.target.value <= 100) {
+                getTotal();
+                let product = productInLocalStorage.find(element => element._id == event.target.parentElement.parentElement.parentElement.parentElement.dataset.id && element.color == event.target.parentElement.parentElement.parentElement.parentElement.dataset.color);
+                product.quantity = event.target.value;
+                localStorage.setItem("product", JSON.stringify(productInLocalStorage));
+            }else {
+                window.alert("Champ incorrect! La quantité doit être comprise entre 1 et 100");
+            }
+        }
+    });
+    
+}
+updateQuantity();
+
+function deleteProduct() {
+    const btnProductDeleted = document.querySelectorAll(".deleteItem");
+
+    for(let i = 0; i < btnProductDeleted.length; i++) {
+        btnProductDeleted[i].addEventListener('click' , function(event) {
+            let product = productInLocalStorage.find(element => element._id == event.target.parentElement.parentElement.parentElement.parentElement.dataset.id && element.color == event.target.parentElement.parentElement.parentElement.parentElement.dataset.color);
+            productInLocalStorage.splice(productInLocalStorage.indexOf(product), 1);
+            localStorage.setItem("product" , JSON.stringify(productInLocalStorage));
+            location.reload();
+        });
+    }
+}
+deleteProduct();

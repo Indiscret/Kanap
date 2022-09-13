@@ -46,25 +46,31 @@ function addToCart(id) {
         const colorSelected = document.getElementById("colors").value;
         const quantitySelected = document.getElementById("quantity").value;
         
-        const productToAdd = {
-            _id: id,
-            color: colorSelected,
-            quantity: quantitySelected,
-        }
-        
-        if (arrayProduct == null) {
-            arrayProduct = [];
-            arrayProduct.push(productToAdd);
+
+        if(!colorSelected || (quantitySelected > 100 || quantitySelected < 1)) {
+             window.alert("Champ incorrect! Couleur non définie ou quantité incorrect");
         } else {
-            const productAlreadyInCart = arrayProduct.find(product => product._id == productToAdd._id && product.color == productToAdd.color);
-            if(productAlreadyInCart) {
-                const index = arrayProduct.indexOf(productAlreadyInCart);
-                arrayProduct[index].quantity = Number(arrayProduct[index].quantity) + Number(quantitySelected);
-            } else {
-                arrayProduct.push(productToAdd);
+            const productToAdd = {
+                _id: id,
+                color: colorSelected,
+                quantity: quantitySelected,
             }
+            
+            if (arrayProduct == null) {
+                arrayProduct = [];
+                arrayProduct.push(productToAdd);
+            } else {
+                const productAlreadyInCart = arrayProduct.find(product => product._id == productToAdd._id && product.color == productToAdd.color);
+                if(productAlreadyInCart) {
+                    const index = arrayProduct.indexOf(productAlreadyInCart);
+                    arrayProduct[index].quantity = Number(arrayProduct[index].quantity) + Number(quantitySelected);
+                } else {
+                    arrayProduct.push(productToAdd);
+                }
+            }
+            localStorage.setItem("product",JSON.stringify(arrayProduct));
+            location.replace("./index.html");
         }
-        localStorage.setItem("product",JSON.stringify(arrayProduct));
     });
 }
 addToCart(getProductIdFromUrl());
