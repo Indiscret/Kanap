@@ -4,6 +4,7 @@ const products = await reponse.json();
 
 const sectionEmptyCart = document.querySelector("#cart__items");
 
+// Récupère chaque produit ajouté au panier pour les afficher
 function getCart(products) {
     if (productInLocalStorage === null || productInLocalStorage == 0) {
         const emptyCart = `<p>Votre panier est vide</p>`;
@@ -80,30 +81,27 @@ function getCart(products) {
 }
 getCart(products);
 
-function getTotal(pro) {
+// Récupère le prix et la quantité total des produits
+function getTotal() {
     let elementQuantity = document.getElementsByClassName('itemQuantity');
+    let totalQuantityElement = document.getElementById('totalQuantity');
+    let totalPriceElement = document.getElementById('totalPrice');
+    
     let totalQuantity = 0;
-    
-    for(let i = 0; i < elementQuantity.length; i++) {
-        totalQuantity += Number(elementQuantity[i].value);
-    }
-    
-    let productTotalQuantity = document.getElementById('totalQuantity');
-    productTotalQuantity.innerText = totalQuantity;
-    
     let totalPrice = 0;
-
-    for(let i = 0; i < elementQuantity.length; i++) {
-        const currentProduct = products.find(element => element._id == productInLocalStorage[i]._id);
-        totalPrice += Number(elementQuantity[i].value) * Number(currentProduct.price);
-    }
-
-    let productTotalPrice = document.getElementById('totalPrice');
-    productTotalPrice.innerText = totalPrice;
     
+    for (let i = 0; i < elementQuantity.length; i++) {
+        const currentProduct = products.find(element => element._id == productInLocalStorage[i]._id);
+        totalQuantity += parseInt(elementQuantity[i].value);
+        totalPrice += parseInt(elementQuantity[i].value) * parseFloat(currentProduct.price);
+    }
+    
+    totalQuantityElement.innerText = totalQuantity;
+    totalPriceElement.innerText = totalPrice;
 }
 getTotal();
 
+// Mise à jour de la quantité en fonction des changements apporté sur la page
 function updateQuantity() {
     document.addEventListener('change', function(event) {
         if(event.target.classList.contains('itemQuantity')) {
@@ -121,11 +119,12 @@ function updateQuantity() {
 }
 updateQuantity();
 
+// Supprime le produit du panier suite à l'appuie sur le boutton
 function deleteProduct() {
     const btnProductDeleted = document.getElementsByClassName("deleteItem");
 
-    for(let i = 0; i < btnProductDeleted.length; i++) {
-        btnProductDeleted[i].addEventListener('click' , function(event) {
+    for (let btn of btnProductDeleted) {
+        btn.addEventListener('click' , function(event) {
             let product = productInLocalStorage.find(element => element._id == event.target.parentElement.parentElement.parentElement.parentElement.dataset.id && element.color == event.target.parentElement.parentElement.parentElement.parentElement.dataset.color);
             productInLocalStorage.splice(productInLocalStorage.indexOf(product), 1);
             localStorage.setItem("product" , JSON.stringify(productInLocalStorage));
@@ -135,12 +134,13 @@ function deleteProduct() {
 }
 deleteProduct();
 
-function getForm() {
-    const form = document.querySelector(".cart__order__form");
+const nameRegExp = new RegExp("^[a-zA-Zàâäéèêëîïìôöòûüùç,.'-]+$");
+const addressRegExp = new RegExp("^[0-9]{1,3}(?:[,. ]{1}[-a-zA-Zàâäéèêëîïìôöòûüùç]+)+$");
+const emailRegExp = new RegExp("^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$");
 
-    const nameRegExp = new RegExp("^[a-zA-Zàâäéèêëîïìôöòûüùç,.'-]+$");
-    const addressRegExp = new RegExp("^[0-9]{1,3}(?:[,. ]{1}[-a-zA-Zàâäéèêëîïìôöòûüùç]+)+$");
-    const emailRegExp = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$');
+// Récupère les informations valides du formulaire pour l'achat
+function getValidForm() {
+    const form = document.querySelector(".cart__order__form");
 
     form.firstName.addEventListener('change', function() {
         validFirstName(this);
@@ -208,8 +208,9 @@ function getForm() {
         }
     }
 }
-getForm();
+getValidForm();
 
+// Envois les informations récupérer de la fonction getValidForm pour passer la commande
 function postForm() {
     const form = document.querySelector(".cart__order__form");
 
@@ -223,21 +224,31 @@ function postForm() {
             city: form.city.value,
             email: form.email.value,
         }
+        
         let products = productInLocalStorage.map(product => product._id);
         const order = {
             contact,
             products,
         }
 
-        fetch("http://localhost:3000/api/products/order", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(order)
-        }).then((reponse) => reponse.json())
-        .then(data => window.location.href = "confirmation.html?orderId=" + data.orderId)
+        if (productInLocalStorage.length > 0) {
+            if (nameRegExp.test(form.firstName.value) && nameRegExp.test(form.lastName.value) && addressRegExp.test(form.address.value) && nameRegExp.test(form.city.value) && emailRegExp.test(form.email.value)) {
+                fetch("http://localhost:3000/api/products/order", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(order)
+                })
+                .then((reponse) => reponse.json())
+                .then(data => window.location.href = "confirmation.html?orderId=" + data.orderId)
+            } else {
+                window.alert("Veuillez remplir correctement le formulaire.");
+            }
+        } else {
+            window.alert("Votre panier est vide.");
+        }
     });
 }
 postForm();
